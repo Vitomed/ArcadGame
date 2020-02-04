@@ -2,18 +2,17 @@ import copy
 from itertools import chain
 
 NUMBER = 43
-# NUMBER = 10
-
 board = list(range(1, NUMBER))
-
-print(board)
+ROWS = 6
+COLUMNS = 7
 
 
 def draw_board(board, rows, columns):
+    cells = int(rows * columns)
     print(f"{'-'*30}")
     columns_row = ""
-    for i in range(0, 42, 7):
-        for j in range(0, 7, 1):
+    for i in range(0, cells, columns):
+        for j in range(0, columns):
             columns_row += f"|{board[i + j]}\t"
         columns_row += f"|\n{'-'*30}\n"
     print(columns_row)
@@ -38,8 +37,10 @@ def take_input(player_token):
             print("Некорректный ввод. Введите число от 1 до 42 чтобы походить.")
 
 
-def coord(board, win=[]):
-    win_coord = ((0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6))
+def coord(win_lst=None):
+    if win_lst is not None:
+        return win_lst
+    win_lst = []
     win_coord_1 = ((i, i + 1, i + 2, i + 3) for i in range(0, 4, 1))
     win_coord_2 = ((i, i + 1, i + 2, i + 3) for i in range(7, 11, 1))
     win_coord_3 = ((i, i + 1, i + 2, i + 3) for i in range(14, 18, 1))
@@ -52,22 +53,26 @@ def coord(board, win=[]):
     win_coord_9 = ((i + 14, i + 21, i + 28, i + 36) for i in range(0, 7))
 
     for i in range(1, 9):
-        win.append(tuple(eval(f"win_coord_{i}")))
-    win = list(chain(*win))
-    print("win", win)
-    return win
+        win_lst.append(tuple(eval(f"win_coord_{i}")))
+    win_lst = list(chain(*win_lst))
+    print("win", win_lst)
+    return win_lst
 
 
 def check_win(board, win_coord):
-    print("len", len(win_coord))
     for each in win_coord:
         if board[each[0]] == board[each[1]] == board[each[2]] == board[each[3]]:
-            return board[each[0]]
+            if board[each[0]] == "X":
+                return "Игрок 1 выиграл"
+            return "Игрок 2 выиграл"
     return False
 
 
-def main(board):
+def main(board, win_coord, r, c):
     counter = 0
+    rows = r
+    columns = c
+    cells = int(rows * columns)
     win = False
     while not win:
         draw_board(board, rows=6, columns=7)
@@ -79,16 +84,18 @@ def main(board):
             take_input("O")
         counter += 1
         if counter > 1:
-            win_coord = coord(board)
             tmp = check_win(board, win_coord=win_coord)
             if tmp:
                 print(tmp, "выиграл!")
-                win = True
                 break
-        if counter == 9:
+        if counter == cells:
             print("Ничья!")
             break
     draw_board(board, rows=6, columns=7)
 
+# class WinData:
+#     def __init__(self):
 
-main(board)
+if __name__ == "__main__":
+    win = coord()
+    main(board, win_coord=win, r=ROWS, c=COLUMNS)
