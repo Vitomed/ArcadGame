@@ -1,20 +1,18 @@
-import copy
 from itertools import chain
 
-NUMBER = 43
-board = list(range(1, NUMBER))
 ROWS = 6
 COLUMNS = 7
 
 
 def draw_board(board, rows, columns):
+
     cells = int(rows * columns)
-    print(f"{'-'*30}")
     columns_row = ""
+    print(f"{'-'*60}")
     for i in range(0, cells, columns):
         for j in range(0, columns):
-            columns_row += f"|{board[i + j]}\t"
-        columns_row += f"|\n{'-'*30}\n"
+            columns_row += f"|\t{board[i + j]}\t"
+        columns_row += f"|\n{'-'*60}\n"
     print(columns_row)
 
 
@@ -24,12 +22,12 @@ def take_input(player_token):
         player_answer = input("Куда поставим " + player_token+"? ")
         try:
             player_answer = int(player_answer)
-        except:
-            print ("Некорректный ввод. Вы уверены, что ввели число?")
+        except ValueError:
+            print("Некорректный ввод. Вы уверены, что ввели число?")
             continue
-        if 1 <= player_answer <= 42:
-            if (str(board[player_answer-1]) not in "XO"):
-                board[player_answer-1] = player_token
+        if 0 <= player_answer <= 42:
+            if str(board[player_answer]) not in "XO":
+                board[player_answer] = player_token
                 valid = True
             else:
                 print("Эта клеточка уже занята")
@@ -37,23 +35,18 @@ def take_input(player_token):
             print("Некорректный ввод. Введите число от 1 до 42 чтобы походить.")
 
 
-def coord(win_lst=None):
+def coord(win_lst=None, cells=42, step=7):
     if win_lst is not None:
         return win_lst
     win_lst = []
-    win_coord_1 = ((i, i + 1, i + 2, i + 3) for i in range(0, 4, 1))
-    win_coord_2 = ((i, i + 1, i + 2, i + 3) for i in range(7, 11, 1))
-    win_coord_3 = ((i, i + 1, i + 2, i + 3) for i in range(14, 18, 1))
-    win_coord_4 = ((i, i + 1, i + 2, i + 3) for i in range(21, 25, 1))
-    win_coord_5 = ((i, i + 1, i + 2, i + 3) for i in range(28, 32, 1))
-    win_coord_6 = ((i, i + 1, i + 2, i + 3) for i in range(35, 39, 1))
 
-    win_coord_7 = ((i, i + 7, i + 14, i + 21) for i in range(0, 7))
-    win_coord_8 = ((i + 7, i + 14, i + 21, i + 28) for i in range(0, 7))
-    win_coord_9 = ((i + 14, i + 21, i + 28, i + 36) for i in range(0, 7))
+    win_coord_1 = [(i, i + 1, i + 2, i + 3) for n in range(0, cells-3, step) for i in range(n, n + 4)]
+    win_coord_2 = [(i, i + 7, i + 14, i + 21) for n in range(0, 15, step) for i in range(n, n + 7)]
+    win_coord_3 = [(i, i + 8, i + 16, i + 24) for n in range(0, 15, step) for i in range(n, n + 4)]
+    win_coord_4 = [(i, i + 6, i + 12, i + 18) for n in range(3, 22, step) for i in range(n, n + 4)]
 
-    for i in range(1, 9):
-        win_lst.append(tuple(eval(f"win_coord_{i}")))
+    for i in range(1, 5):
+        win_lst.append((eval(f"win_coord_{i}")))
     win_lst = list(chain(*win_lst))
     print("win", win_lst)
 
@@ -78,13 +71,13 @@ def main(board, win_coord, r, c):
     while not win:
         draw_board(board, rows=rows, columns=columns)
         if counter % 2 == 0:
-            print("Игрок 1")
+            print("Ход игрока № 1:")
             take_input("X")
         else:
-            print("Игрок 2")
+            print("Ход игрока № 2:")
             take_input("O")
         counter += 1
-        if counter > 1:
+        if counter > 6:
             tmp = check_win(board, win_coord=win_coord)
             if tmp:
                 print(tmp)
@@ -94,9 +87,9 @@ def main(board, win_coord, r, c):
             break
     draw_board(board, rows=rows, columns=columns)
 
-# class WinData:
-#     def __init__(self):
 
 if __name__ == "__main__":
+    cells = int(ROWS * COLUMNS)
+    board = list(range(cells))
     win = coord()
     main(board, win_coord=win, r=ROWS, c=COLUMNS)
