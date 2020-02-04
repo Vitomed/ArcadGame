@@ -56,6 +56,7 @@ def coord(win_lst=None):
         win_lst.append(tuple(eval(f"win_coord_{i}")))
     win_lst = list(chain(*win_lst))
     print("win", win_lst)
+
     return win_lst
 
 
@@ -63,8 +64,8 @@ def check_win(board, win_coord):
     for each in win_coord:
         if board[each[0]] == board[each[1]] == board[each[2]] == board[each[3]]:
             if board[each[0]] == "X":
-                return "Игрок 1 выиграл"
-            return "Игрок 2 выиграл"
+                return "Игрок 1 выиграл!"
+            return "Игрок 2 выиграл!"
     return False
 
 
@@ -75,7 +76,7 @@ def main(board, win_coord, r, c):
     cells = int(rows * columns)
     win = False
     while not win:
-        draw_board(board, rows=6, columns=7)
+        draw_board(board, rows=rows, columns=columns)
         if counter % 2 == 0:
             print("Игрок 1")
             take_input("X")
@@ -86,12 +87,12 @@ def main(board, win_coord, r, c):
         if counter > 1:
             tmp = check_win(board, win_coord=win_coord)
             if tmp:
-                print(tmp, "выиграл!")
+                print(tmp)
                 break
         if counter == cells:
             print("Ничья!")
             break
-    draw_board(board, rows=6, columns=7)
+    draw_board(board, rows=rows, columns=columns)
 
 # class WinData:
 #     def __init__(self):
