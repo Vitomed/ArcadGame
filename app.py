@@ -50,7 +50,7 @@ def take_input(player_token: str, items: object):
         try:
             player_answer = int(player_answer)
         except ValueError:
-            print("Некорректный ввод. Вы уверены, что ввели число?")
+            print("Некорректный ввод. Я принимаю только целые числа?")
             continue
         if 0 <= player_answer <= 41:
             if str(items.get_item(player_answer))not in "XO":
@@ -59,7 +59,7 @@ def take_input(player_token: str, items: object):
             else:
                 print("Эта клеточка уже занята")
         else:
-            print("Некорректный ввод. Введите число от 1 до 42 чтобы походить.")
+            print("Некорректный ввод. Введите число от 0 до 41 чтобы походить.")
 
 
 def coord(win_lst=None, cells=42, step=7):
@@ -75,7 +75,6 @@ def coord(win_lst=None, cells=42, step=7):
     for i in range(1, 5):
         win_lst.append((eval(f"win_coord_{i}")))
     win_lst = list(chain(*win_lst))
-    print("win", win_lst)
 
     return win_lst
 
@@ -97,23 +96,25 @@ if __name__ == "__main__":
     board = Board(rows=ROWS, columns=COLUMNS)
     flag = True
     counter = 0
-    while flag:
-        board.draw_board(item_board)
+    try:
+        while flag:
+            board.draw_board(item_board)
 
-        if counter % 2 == 0:
-            print("Ход игрока № 1:")
-            take_input("X", item_board)
-        else:
-            print("Ход игрока № 2:")
-            take_input("O", item_board)
-        counter += 1
-        if counter > 6:
-            tmp = check_win(item_board, win_coord=win_answers)
-            if tmp:
-                print(tmp)
+            if counter % 2 == 0:
+                print("Ход игрока № 1:")
+                take_input("X", item_board)
+            else:
+                print("Ход игрока № 2:")
+                take_input("O", item_board)
+            counter += 1
+            if counter > 6:
+                tmp = check_win(item_board, win_coord=win_answers)
+                if tmp:
+                    print(tmp)
+                    break
+            if counter == cells:
+                print("Ничья!")
                 break
-        if counter == cells:
-            print("Ничья!")
-            break
-    board.draw_board(item_board)
-
+        board.draw_board(item_board)
+    except KeyboardInterrupt:
+        print("\nИгра преждевременно остановлена!")
