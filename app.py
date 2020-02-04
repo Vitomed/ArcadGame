@@ -4,19 +4,46 @@ ROWS = 6
 COLUMNS = 7
 
 
-def draw_board(board, rows, columns):
+class ItemsBoard:
 
-    cells = int(rows * columns)
-    columns_row = ""
-    print(f"{'-'*60}")
-    for i in range(0, cells, columns):
-        for j in range(0, columns):
-            columns_row += f"|\t{board[i + j]}\t"
-        columns_row += f"|\n{'-'*60}\n"
-    print(columns_row)
+    __slots__ = ["_cells"]
+
+    def __init__(self, rows, columns):
+
+        self._cells = list(range(rows * columns))
+
+    @property
+    def cells(self):
+        return self._cells
+
+    def get_item(self, i):
+        return self._cells[i]
+
+    def set_item(self, i, item):
+        self._cells[i] = item
 
 
-def take_input(player_token):
+class Board:
+
+    __slots__ = ["rows", "columns", "cells"]
+
+    def __init__(self, rows, columns):
+        self.rows = rows
+        self.columns = columns
+        self.cells = rows * columns
+
+    def draw_board(self, board):
+        columns_row = ""
+        print(f"{'-' * 60}")
+        for i in range(0, self.cells, self.columns):
+            for j in range(0, self.columns):
+                item_index = i + j
+                columns_row += f"|\t{board.get_item(item_index)}\t"
+            columns_row += f"|\n{'-' * 60}\n"
+        print(columns_row)
+
+
+def take_input(player_token: str, items: object):
     valid = False
     while not valid:
         player_answer = input("Куда поставим " + player_token+"? ")
@@ -25,9 +52,9 @@ def take_input(player_token):
         except ValueError:
             print("Некорректный ввод. Вы уверены, что ввели число?")
             continue
-        if 0 <= player_answer <= 42:
-            if str(board[player_answer]) not in "XO":
-                board[player_answer] = player_token
+        if 0 <= player_answer <= 41:
+            if str(items.get_item(player_answer))not in "XO":
+                items.set_item(player_answer, player_token)
                 valid = True
             else:
                 print("Эта клеточка уже занята")
@@ -53,7 +80,8 @@ def coord(win_lst=None, cells=42, step=7):
     return win_lst
 
 
-def check_win(board, win_coord):
+def check_win(items, win_coord):
+    board = items.cells
     for each in win_coord:
         if board[each[0]] == board[each[1]] == board[each[2]] == board[each[3]]:
             if board[each[0]] == "X":
@@ -62,34 +90,30 @@ def check_win(board, win_coord):
     return False
 
 
-def main(board, win_coord, r, c):
+if __name__ == "__main__":
+    cells = int(ROWS * COLUMNS)
+    win_answers = coord()
+    item_board = ItemsBoard(rows=ROWS, columns=COLUMNS)
+    board = Board(rows=ROWS, columns=COLUMNS)
+    flag = True
     counter = 0
-    rows = r
-    columns = c
-    cells = int(rows * columns)
-    win = False
-    while not win:
-        draw_board(board, rows=rows, columns=columns)
+    while flag:
+        board.draw_board(item_board)
+
         if counter % 2 == 0:
             print("Ход игрока № 1:")
-            take_input("X")
+            take_input("X", item_board)
         else:
             print("Ход игрока № 2:")
-            take_input("O")
+            take_input("O", item_board)
         counter += 1
         if counter > 6:
-            tmp = check_win(board, win_coord=win_coord)
+            tmp = check_win(item_board, win_coord=win_answers)
             if tmp:
                 print(tmp)
                 break
         if counter == cells:
             print("Ничья!")
             break
-    draw_board(board, rows=rows, columns=columns)
+    board.draw_board(item_board)
 
-
-if __name__ == "__main__":
-    cells = int(ROWS * COLUMNS)
-    board = list(range(cells))
-    win = coord()
-    main(board, win_coord=win, r=ROWS, c=COLUMNS)
