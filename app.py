@@ -1,52 +1,61 @@
+import numpy as np
 from itertools import chain
 
 ROWS = 6
 COLUMNS = 7
+WIN_ELEMENTS = 4
 
 
 class ItemsBoard:
 
-    __slots__ = ["_cells"]
+    __slots__ = ["rows", "columns", "np_cells"]
 
-    def __init__(self, rows, columns):
+    def __init__(self, rows: int, columns: int, cells_range: list):
 
-        self._cells = list(range(rows * columns))
+        self.rows = rows
+        self.columns = columns
+        self.np_cells = np.array(cells_range, dtype=object).reshape(rows, columns)
 
     @property
     def cells(self):
-        return self._cells
+        return self.np_cells
 
-    def get_item(self, i):
-        return self._cells[i]
+    def get_item(self, i, j):
+        return self.np_cells[i][j]
 
-    def set_item(self, i, item):
-        self._cells[i] = item
+    def set_item(self, i, j, item):
+        print(self.np_cells[i][j])
+        self.np_cells[i][j] = item
+
+    def get_indexs(self, item: int):
+        for i in range(self.rows):
+            for j in range(self.columns):
+                if self.np_cells[i][j] == item:
+                    return i, j
 
 
 class Board:
 
-    __slots__ = ["rows", "columns", "cells"]
+    __slots__ = ["rows", "columns"]
 
     def __init__(self, rows, columns):
         self.rows = rows
         self.columns = columns
-        self.cells = rows * columns
 
     def draw_board(self, items_board):
         columns_row = ""
         print(f"{'-' * 60}")
-        for i in range(0, self.cells, self.columns):
-            for j in range(0, self.columns):
-                item_index = i + j
-                columns_row += f"|\t{items_board.get_item(item_index)}\t"
+        for i in range(self.rows):
+            for j in range(self.columns):
+                columns_row += f"|\t{items_board.get_item(i, j)}\t"
             columns_row += f"|\n{'-' * 60}\n"
         print(columns_row)
 
 
-def take_input(player_token: str, items: object):
+def take_input(player_token: str, item_board: object):
     valid = False
     while not valid:
-        player_answer = input("Куда поставим " + player_token+"? ")
+        player_answer = input("Куда поставим " + player_token + "? ")
 
         try:
             player_answer = int(player_answer)
@@ -55,14 +64,38 @@ def take_input(player_token: str, items: object):
             continue
 
         if 0 <= player_answer <= 41:
+            try:
+                i, j = item_board.get_indexs(player_answer)
 
-            if str(items.get_item(player_answer))not in "XO":
-                items.set_item(player_answer, player_token)
-                valid = True
-            else:
+            except (ValueError, TypeError):
                 print("Эта клеточка уже занята")
+            else:
+                item_board.set_item(i, j, player_token)
+                valid = True
         else:
             print("Некорректный ввод. Введите число от 0 до 41 чтобы походить.")
+
+
+def win_coordinates(rows, columns, lenght):
+    # horizontal winning values
+    _cells = int(rows * columns)
+
+    def horizontal():
+        nonlocal _cells, lenght
+        main_lst = []
+        worker_lst = []
+        for item in range(_cells):
+            worker_lst.append(item)
+
+            if len(worker_lst) == lenght:
+                print(worker_lst)
+                main_lst.append(worker_lst)
+                worker_lst = []
+
+        return main_lst
+
+    return horizontal()
+
 
 
 def coord(cells, step):
@@ -106,8 +139,11 @@ def check_win(items_board: object, win_coord: list):
 if __name__ == "__main__":
     cells = int(ROWS * COLUMNS)
     win_board = coord(cells=cells, step=COLUMNS)
-    item_board = ItemsBoard(rows=ROWS, columns=COLUMNS)
+
+    cells_range = list(range(cells))
+    item_board = ItemsBoard(rows=ROWS, columns=COLUMNS, cells_range=cells_range)
     board = Board(rows=ROWS, columns=COLUMNS)
+
     flag = True
     counter = 0
     try:
@@ -132,3 +168,5 @@ if __name__ == "__main__":
         board.draw_board(item_board)
     except KeyboardInterrupt:
         print("\nИгра преждевременно остановлена!")
+
+
