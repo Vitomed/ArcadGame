@@ -89,25 +89,26 @@ def take_input(player_token: str, item_board: object):
             print("Некорректный ввод. Введите число от 0 до 41 чтобы походить.")
 
 
-class ChechWin:
-
-    def __init__(self, items_board: object, marker:str, win_lenght: int, players: dict):
-
-        self.i_b = items_board.cells
-        self.win_lenght = win_lenght
-        self.players = players
-
-    def check_row(self, i_b, marker):
-        for row in enumerate(i_b):
-            if listSum(row[1], marker, self.win_lenght) == "ok":
-                print("Winner:", self.players[marker])
-                return True
-
-    def check_column(self, i_b, marker):
-        for index, _ in enumerate(i_b[0]):
-            if listSum(i_b[:, index], marker, self.win_lenght) == "ok":
-                print("Winner:", self.players[marker])
-                return True
+# under revision
+# class ChechWin:
+#
+#     def __init__(self, items_board: object, marker:str, win_lenght: int, players: dict):
+#
+#         self.i_b = items_board.cells
+#         self.win_lenght = win_lenght
+#         self.players = players
+#
+#     def check_row(self, i_b, marker):
+#         for row in enumerate(i_b):
+#             if list_sum(row[1], marker, self.win_lenght) == "ok":
+#                 print("Winner:", self.players[marker])
+#                 return True
+#
+#     def check_column(self, i_b, marker):
+#         for index, _ in enumerate(i_b[0]):
+#             if list_sum(i_b[:, index], marker, self.win_lenght) == "ok":
+#                 print("Winner:", self.players[marker])
+#                 return True
 
 
 def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
@@ -115,13 +116,13 @@ def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
 
     # check for row
     for row in enumerate(i_b):
-        if listSum(row[1], marker, win_lenght) == "ok":
+        if list_sum(row[1], marker, win_lenght) == "ok":
             print("Winner:", players[marker])
             return True
 
     # check for column
     for index, _ in enumerate(i_b[0]):
-        if listSum(i_b[:, index], marker, win_lenght) == "ok":
+        if list_sum(i_b[:, index], marker, win_lenght) == "ok":
             print("Winner:", players[marker])
             return True
 
@@ -138,18 +139,18 @@ def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
 
     #  check for diagonally
     for row in fdiag:
-        if listSum(row, marker, win_lenght) == "ok":
+        if list_sum(row, marker, win_lenght) == "ok":
             print("Победил: ", players[marker])
             return True
 
     # check for diagonally
     for row in bdiag:
-        if listSum(row, marker, win_lenght) == "ok":
+        if list_sum(row, marker, win_lenght) == "ok":
             print("Победил: ", players[marker])
             return True
 
 
-def listSum(row, marker, lenght):
+def list_sum(row, marker, lenght):
     for key, group in groupby(row):
         if key == marker:
             sequence = list(group)
