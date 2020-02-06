@@ -24,9 +24,22 @@ class ItemsBoard:
     def get_item(self, i, j):
         return self.np_cells[i][j]
 
-    def set_item(self, i, j, item):
-        print(self.np_cells[i][j])
-        self.np_cells[i][j] = item
+    #  without gravity
+    # def set_item(self, i, j, item):
+    #     print(self.np_cells[i][j])
+    #     self.np_cells[i][j] = item
+
+    #  with gravity
+    def set_item(self, j, marker):
+        const = j
+        for i in range(self.rows):
+            if self.np_cells[i][const] == "X" or self.np_cells[i][const] == "O":
+                self.np_cells[i - 1][const] = marker
+                return True
+            else:
+                continue
+        self.np_cells[self.rows - 1][const] = marker
+
 
     def get_indexs(self, item: int):
         for i in range(self.rows):
@@ -70,10 +83,31 @@ def take_input(player_token: str, item_board: object):
             except (ValueError, TypeError):
                 print("Эта клеточка уже занята")
             else:
-                item_board.set_item(i, j, player_token)
+                item_board.set_item(j, player_token)
                 valid = True
         else:
             print("Некорректный ввод. Введите число от 0 до 41 чтобы походить.")
+
+
+class ChechWin:
+
+    def __init__(self, items_board: object, marker:str, win_lenght: int, players: dict):
+
+        self.i_b = items_board.cells
+        self.win_lenght = win_lenght
+        self.players = players
+
+    def check_row(self, i_b, marker):
+        for row in enumerate(i_b):
+            if listSum(row[1], marker, self.win_lenght) == "ok":
+                print("Winner:", self.players[marker])
+                return True
+
+    def check_column(self, i_b, marker):
+        for index, _ in enumerate(i_b[0]):
+            if listSum(i_b[:, index], marker, self.win_lenght) == "ok":
+                print("Winner:", self.players[marker])
+                return True
 
 
 def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
