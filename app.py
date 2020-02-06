@@ -1,9 +1,10 @@
 import numpy as np
-from itertools import chain
+import sys
 
 ROWS = 6
 COLUMNS = 7
-WIN_ELEMENTS = 4
+WIN_ELEMENTS = 3
+PLAYERS = {"X": "Игрок № 1", "0": "Игрок № 2"}
 
 
 class ItemsBoard:
@@ -66,7 +67,6 @@ def take_input(player_token: str, item_board: object):
         if 0 <= player_answer <= 41:
             try:
                 i, j = item_board.get_indexs(player_answer)
-
             except (ValueError, TypeError):
                 print("Эта клеточка уже занята")
             else:
@@ -76,70 +76,55 @@ def take_input(player_token: str, item_board: object):
             print("Некорректный ввод. Введите число от 0 до 41 чтобы походить.")
 
 
-def win_coordinates(rows, columns, lenght):
-    # horizontal winning values
-    _cells = int(rows * columns)
+def check_win(items_board: object, marker: str, win_elements: int, players: dict):
+    i_b = items_board.cells
 
-    def horizontal():
-        nonlocal _cells, lenght
-        main_lst = []
-        worker_lst = []
-        for item in range(_cells):
-            worker_lst.append(item)
+    # check for row
+    for row in enumerate(i_b):
+        if listSum(row[1], marker) == win_elements:
+            print("Winner:", players[marker])
+            return True
 
-            if len(worker_lst) == lenght:
-                print(worker_lst)
-                main_lst.append(worker_lst)
-                worker_lst = []
+    # check for column
+    for index, _ in enumerate(i_b[0]):
+        if listSum(i_b[:, index], marker) == win_elements:
+            print("Winner:", players[marker])
+            return True
 
-        return main_lst
+    # create diagonaly
+    max_col = len(i_b)
+    max_row = len(i_b[0])
+    min_bdiag = -max_col + 1
+    fdiag = [[] for i in range(max_col + max_row - 1)]
+    bdiag = [[] for i in range(len(fdiag))]
+    for y in range(max_col):
+        for x in range(max_row):
+            fdiag[x + y].append(i_b[y][x])
+            bdiag[-min_bdiag + x - y].append(i_b[y][x])
 
-    return horizontal()
+    #  check for diagonally
+    for row in fdiag:
+        if listSum(row, marker) == win_elements:
+            print("Победил: ", players[marker])
+            return True
 
-
-
-def coord(cells, step):
-    """Calculates winning coordinates
-
-    :param cells: number cells
-    :param step: step is equivalent number  of columns
-    :return: list with winning coordinates
-    """
-
-    win_lst = []
-
-    # horizontal winning values
-    win_coord_1 = [(i, i + 1, i + 2, i + 3) for n in range(0, cells, step) for i in range(n, n + 4)]
-
-    # vertical winning values
-    win_coord_2 = [(i, i + 7, i + 14, i + 21) for n in range(0, 15, step) for i in range(n, n + 7)]
-
-    # victory values on the left diagonal
-    win_coord_3 = [(i, i + 8, i + 16, i + 24) for n in range(0, 15, step) for i in range(n, n + 4)]
-
-    # victory values on the right diagonal
-    win_coord_4 = [(i, i + 6, i + 12, i + 18) for n in range(3, 22, step) for i in range(n, n + 4)]
-
-    for i in range(1, 5):
-        win_lst.append((eval(f"win_coord_{i}")))
-    win_lst = list(chain(*win_lst))
-    return win_lst
+    # check for diagonally
+    for row in bdiag:
+        if listSum(row, marker) == win_elements:
+            print("Победил: ", players[marker])
+            return True
 
 
-def check_win(items_board: object, win_coord: list):
-    board = items_board.cells
-    for each in win_coord:
-        if board[each[0]] == board[each[1]] == board[each[2]] == board[each[3]]:
-            if board[each[0]] == "X":
-                return "Игрок 1 выиграл!"
-            return "Игрок 2 выиграл!"
-    return False
+def listSum(row, marker):
+    count = 0
+    for element in row:
+        if element == marker:
+            count += 1
+    return count
 
 
 if __name__ == "__main__":
     cells = int(ROWS * COLUMNS)
-    win_board = coord(cells=cells, step=COLUMNS)
-
     cells_range = list(range(cells))
     item_board = ItemsBoard(rows=ROWS, columns=COLUMNS, cells_range=cells_range)
     board = Board(rows=ROWS, columns=COLUMNS)
@@ -149,19 +134,19 @@ if __name__ == "__main__":
     try:
         while flag:
             board.draw_board(item_board)
-
             if counter % 2 == 0:
+                marker = "X"
                 print("Ход игрока № 1:")
-                take_input("X", item_board)
+                take_input(marker, item_board)
             else:
                 print("Ход игрока № 2:")
-                take_input("O", item_board)
+                marker = "0"
+                take_input(marker, item_board)
+            # if counter > WIN_ELEMENTS:
+            temp = check_win(item_board, marker, WIN_ELEMENTS, players=PLAYERS)
+            if temp:
+                break
             counter += 1
-            if counter > 6:
-                tmp = check_win(item_board, win_coord=win_board)
-                if tmp:
-                    print(tmp)
-                    break
             if counter == cells:
                 print("Ничья!")
                 break
