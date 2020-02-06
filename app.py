@@ -79,7 +79,6 @@ def take_input(marker: str, item_board: object):
             print("Некорректный ввод. Я принимаю только целые числа!")
             continue
 
-        # if player_answer is any(list(range(item_board.rows))):
         min = 0
         max = item_board.rows
 
@@ -120,13 +119,13 @@ def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
             fdiag[x + y].append(i_b[y][x])
             bdiag[-min_bdiag + x - y].append(i_b[y][x])
 
-    #  check for diagonally
+    #  check for diagonally 1
     for row in fdiag:
         if list_sum(row, marker, win_lenght) == "ok":
             print("Победил: ", players[marker])
             return True
 
-    # check for diagonally
+    # check for diagonally 2
     for row in bdiag:
         if list_sum(row, marker, win_lenght) == "ok":
             print("Победил: ", players[marker])
@@ -151,7 +150,9 @@ if __name__ == "__main__":
     counter = 0
     try:
         while flag:
+
             board.draw_board(item_board)
+
             if counter % 2 == 0:
                 marker = "X"
                 print("Ход игрока № 1:")
@@ -160,7 +161,7 @@ if __name__ == "__main__":
                 print("Ход игрока № 2:")
                 marker = "O"
                 take_input(marker, item_board)
-            # if counter > WIN_ELEMENTS:
+
             temp = check_win(item_board, marker, WIN_ELEMENTS, players=PLAYERS)
             if temp:
                 break
@@ -169,6 +170,7 @@ if __name__ == "__main__":
                 print("Ничья!")
                 break
         board.draw_board(item_board)
+
     except KeyboardInterrupt:
         print("\nИгра преждевременно остановлена!")
 
