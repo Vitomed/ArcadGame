@@ -165,10 +165,10 @@ if __name__ == "__main__":
             temp = check_win(item_board, marker, WIN_ELEMENTS, players=PLAYERS)
             if temp:
                 break
-            counter += 1
             if counter == cells:
                 print("Ничья!")
                 break
+            counter += 1
         board.draw_board(item_board)
 
     except KeyboardInterrupt:
