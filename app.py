@@ -1,10 +1,10 @@
 import numpy as np
-import sys
+from itertools import groupby
 
 ROWS = 6
 COLUMNS = 7
-WIN_ELEMENTS = 3
-PLAYERS = {"X": "Игрок № 1", "0": "Игрок № 2"}
+WIN_ELEMENTS = 4
+PLAYERS = {"X": "Игрок № 1", "O": "Игрок № 2"}
 
 
 class ItemsBoard:
@@ -76,18 +76,18 @@ def take_input(player_token: str, item_board: object):
             print("Некорректный ввод. Введите число от 0 до 41 чтобы походить.")
 
 
-def check_win(items_board: object, marker: str, win_elements: int, players: dict):
+def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
     i_b = items_board.cells
 
     # check for row
     for row in enumerate(i_b):
-        if listSum(row[1], marker) == win_elements:
+        if listSum(row[1], marker, win_lenght) == "ok":
             print("Winner:", players[marker])
             return True
 
     # check for column
     for index, _ in enumerate(i_b[0]):
-        if listSum(i_b[:, index], marker) == win_elements:
+        if listSum(i_b[:, index], marker, win_lenght) == "ok":
             print("Winner:", players[marker])
             return True
 
@@ -104,23 +104,23 @@ def check_win(items_board: object, marker: str, win_elements: int, players: dict
 
     #  check for diagonally
     for row in fdiag:
-        if listSum(row, marker) == win_elements:
+        if listSum(row, marker, win_lenght) == "ok":
             print("Победил: ", players[marker])
             return True
 
     # check for diagonally
     for row in bdiag:
-        if listSum(row, marker) == win_elements:
+        if listSum(row, marker, win_lenght) == "ok":
             print("Победил: ", players[marker])
             return True
 
 
-def listSum(row, marker):
-    count = 0
-    for element in row:
-        if element == marker:
-            count += 1
-    return count
+def listSum(row, marker, lenght):
+    for key, group in groupby(row):
+        if key == marker:
+            sequence = list(group)
+            if len(sequence) == lenght:
+                return "ok"
 
 
 if __name__ == "__main__":
@@ -140,7 +140,7 @@ if __name__ == "__main__":
                 take_input(marker, item_board)
             else:
                 print("Ход игрока № 2:")
-                marker = "0"
+                marker = "O"
                 take_input(marker, item_board)
             # if counter > WIN_ELEMENTS:
             temp = check_win(item_board, marker, WIN_ELEMENTS, players=PLAYERS)
