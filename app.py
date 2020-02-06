@@ -3,49 +3,47 @@ from itertools import groupby
 
 ROWS = 6
 COLUMNS = 7
-WIN_ELEMENTS = 4
+WIN_ELEMENTS = 3
 PLAYERS = {"X": "Игрок № 1", "O": "Игрок № 2"}
 
 
 class ItemsBoard:
 
-    __slots__ = ["rows", "columns", "np_cells"]
+    __slots__ = ["_rows", "_columns", "_np_cells"]
 
     def __init__(self, rows: int, columns: int, cells_range: list):
 
-        self.rows = rows
-        self.columns = columns
-        self.np_cells = np.array(cells_range, dtype=object).reshape(rows, columns)
+        self._rows = rows
+        self._columns = columns
+        self._np_cells = np.array(cells_range, dtype=object).reshape(rows, columns)
+
+    @property
+    def rows(self):
+        return self._rows
 
     @property
     def cells(self):
-        return self.np_cells
+        return self._np_cells
 
     def get_item(self, i, j):
-        return self.np_cells[i][j]
-
-    #  without gravity
-    # def set_item(self, i, j, item):
-    #     print(self.np_cells[i][j])
-    #     self.np_cells[i][j] = item
+        return self._np_cells[i][j]
 
     #  with gravity
     def set_item(self, j, marker):
-        const = j
-        for i in range(self.rows):
-            if self.np_cells[i][const] == "X" or self.np_cells[i][const] == "O":
-                self.np_cells[i - 1][const] = marker
+        column = j
+        for i in range(self._rows):
+
+            #  check cell is empty ""
+            if self._np_cells[i][column]:
+                self._np_cells[i - 1][column] = marker
                 return True
-            else:
-                continue
-        self.np_cells[self.rows - 1][const] = marker
 
+        self._np_cells[self._rows - 1][column] = marker
 
-    def get_indexs(self, item: int):
-        for i in range(self.rows):
-            for j in range(self.columns):
-                if self.np_cells[i][j] == item:
-                    return i, j
+    def get_empty(self, column: int):
+        for i in range(self._rows):
+            if not self._np_cells[i][column]:
+                return True
 
 
 class Board:
@@ -57,6 +55,10 @@ class Board:
         self.columns = columns
 
     def draw_board(self, items_board):
+        header = ""
+        for co_numb in range(self.columns):
+            header += f"|\t{co_numb}\t"
+        print(header + "|")
         columns_row = ""
         print(f"{'-' * 60}")
         for i in range(self.rows):
@@ -66,10 +68,10 @@ class Board:
         print(columns_row)
 
 
-def take_input(player_token: str, item_board: object):
+def take_input(marker: str, item_board: object):
     valid = False
     while not valid:
-        player_answer = input("Куда поставим " + player_token + "? ")
+        player_answer = input(f"Куда поставим {marker}? (укажите номер столбца)")
 
         try:
             player_answer = int(player_answer)
@@ -77,38 +79,19 @@ def take_input(player_token: str, item_board: object):
             print("Некорректный ввод. Я принимаю только целые числа!")
             continue
 
-        if 0 <= player_answer <= 41:
-            try:
-                i, j = item_board.get_indexs(player_answer)
-            except (ValueError, TypeError):
-                print("Эта клеточка уже занята")
-            else:
-                item_board.set_item(j, player_token)
+        # if player_answer is any(list(range(item_board.rows))):
+        min = 0
+        max = item_board.rows
+
+        if min <= player_answer <= max:
+            if item_board.get_empty(player_answer):
+                column = player_answer
+                item_board.set_item(column, marker)
                 valid = True
+            else:
+                print("Эта клеточка уже занята")
         else:
-            print("Некорректный ввод. Введите число от 0 до 41 чтобы походить.")
-
-
-# under revision
-# class ChechWin:
-#
-#     def __init__(self, items_board: object, marker:str, win_lenght: int, players: dict):
-#
-#         self.i_b = items_board.cells
-#         self.win_lenght = win_lenght
-#         self.players = players
-#
-#     def check_row(self, i_b, marker):
-#         for row in enumerate(i_b):
-#             if list_sum(row[1], marker, self.win_lenght) == "ok":
-#                 print("Winner:", self.players[marker])
-#                 return True
-#
-#     def check_column(self, i_b, marker):
-#         for index, _ in enumerate(i_b[0]):
-#             if list_sum(i_b[:, index], marker, self.win_lenght) == "ok":
-#                 print("Winner:", self.players[marker])
-#                 return True
+            print(f"Введите число в диапазоне  от {min}  до {max}, чтобы походить.")
 
 
 def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
@@ -117,13 +100,13 @@ def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
     # check for row
     for row in enumerate(i_b):
         if list_sum(row[1], marker, win_lenght) == "ok":
-            print("Winner:", players[marker])
+            print("Победил: ", players[marker])
             return True
 
     # check for column
     for index, _ in enumerate(i_b[0]):
         if list_sum(i_b[:, index], marker, win_lenght) == "ok":
-            print("Winner:", players[marker])
+            print("Победил: ", players[marker])
             return True
 
     # create diagonaly
@@ -160,7 +143,7 @@ def list_sum(row, marker, lenght):
 
 if __name__ == "__main__":
     cells = int(ROWS * COLUMNS)
-    cells_range = list(range(cells))
+    cells_range = ["" for i in range(cells)]
     item_board = ItemsBoard(rows=ROWS, columns=COLUMNS, cells_range=cells_range)
     board = Board(rows=ROWS, columns=COLUMNS)
 
