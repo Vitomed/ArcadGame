@@ -116,7 +116,7 @@ def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
             return True
 
     diags = [matrix[::-1, :].diagonal(i) for i in range(-rows + 1, columns)]
-    diags.extend(matrix.diagonal(i) for i in range(rows, -columns + 1, -1))
+    diags.extend(matrix.diagonal(i) for i in range(-rows + 1, columns))
 
     #  check for diagonalls
     for row in diags:
