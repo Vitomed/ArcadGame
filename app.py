@@ -5,9 +5,14 @@ from sys import argv
 # ROWS = 6
 # COLUMNS = 7
 # WIN_ELEMENTS = 4
-ROWS = int(argv[1])
-COLUMNS = int(argv[2])
-WIN_ELEMENTS = int(argv[3])
+try:
+    ROWS = int(argv[1])
+    COLUMNS = int(argv[2])
+    WIN_ELEMENTS = int(argv[3])
+except ValueError:
+    raise ValueError("Значения должны быть целочисленными!")
+    
+
 PLAYERS = {"X": "Игрок № 1", "O": "Игрок № 2"}
 
 
@@ -54,15 +59,12 @@ class CellItems:
                 return True
 
 
-class Board:
+class Board(CellItems):
 
-    __slots__ = ("_rows", "_columns")
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-    def __init__(self, rows, columns):
-        self._rows = rows
-        self._columns = columns
-
-    def draw_board(self, cell_items: object):
+    def draw_board(self):
 
         header = ""
         for co_numb in range(self._columns):
@@ -72,12 +74,12 @@ class Board:
         print(f"{'-' * self._columns * 2 *8}")
         for i in range(self._rows):
             for j in range(self._columns):
-                columns_row += f"|\t{cell_items.get_item(i, j)}\t"
+                columns_row += f"|\t{super().get_item(i, j)}\t"
             columns_row += f"|\n{'-' * self._columns * 2 * 8}\n"
         print(columns_row)
 
 
-def take_input(marker: str, cell_items: object):
+def take_input(marker: str, board: object):
     valid = False
     while not valid:
         player_answer = input(f"Куда поставим {marker}? (укажите номер столбца)")
@@ -89,12 +91,12 @@ def take_input(marker: str, cell_items: object):
             continue
 
         min = 0
-        max = cell_items.rows
+        max = board.rows
 
         if min <= player_answer <= max:
-            if cell_items.get_empty(player_answer):
+            if board.get_empty(player_answer):
                 column = player_answer
-                cell_items.set_item(column, marker)
+                board.set_item(column, marker)
                 valid = True
             else:
                 print("Эта клеточка уже занята")
@@ -102,10 +104,10 @@ def take_input(marker: str, cell_items: object):
             print(f"Введите число в диапазоне  от {min}  до {max}, чтобы походить.")
 
 
-def check_win(cell_items: object, marker: str, win_lenght: int, players: dict):
-    rows = cell_items.rows
-    columns = cell_items.columns
-    matrix = cell_items.cells
+def check_win(board: object, marker: str, win_lenght: int, players: dict):
+    rows = board.rows
+    columns = board.columns
+    matrix = board.cells
 
     # check for row
     for idx in range(rows):
@@ -143,33 +145,31 @@ if __name__ == "__main__":
 
     cells = int(ROWS * COLUMNS)
     cells_lst = ["" for i in range(cells)]
-    cell_items = CellItems(rows=ROWS, columns=COLUMNS, cells_lst=cells_lst)
-    board = Board(rows=ROWS, columns=COLUMNS)
+    board = Board(rows=ROWS, columns=COLUMNS, cells_lst=cells_lst)
 
     flag = True
     counter = 0
     try:
         while flag:
 
-            board.draw_board(cell_items)
-
+            board.draw_board()
             if counter % 2 == 0:
                 marker = "X"
                 print("Ход игрока № 1:")
-                take_input(marker, cell_items)
+                take_input(marker, board)
             else:
                 print("Ход игрока № 2:")
                 marker = "O"
-                take_input(marker, cell_items)
+                take_input(marker, board)
 
-            temp = check_win(cell_items, marker, WIN_ELEMENTS, players=PLAYERS)
+            temp = check_win(board, marker, WIN_ELEMENTS, players=PLAYERS)
             if temp:
                 break
             if counter == cells:
                 print("Ничья!")
                 break
             counter += 1
-        board.draw_board(cell_items)
+        board.draw_board()
 
     except KeyboardInterrupt:
         print("\nИгра преждевременно остановлена!")
