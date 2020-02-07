@@ -1,9 +1,13 @@
 import numpy as np
 from itertools import groupby
+from sys import argv
 
-ROWS = 6
-COLUMNS = 7
-WIN_ELEMENTS = 3
+# ROWS = 6
+# COLUMNS = 7
+# WIN_ELEMENTS = 4
+ROWS = int(argv[1])
+COLUMNS = int(argv[2])
+WIN_ELEMENTS = int(argv[3])
 PLAYERS = {"X": "Игрок № 1", "O": "Игрок № 2"}
 
 
@@ -63,11 +67,11 @@ class Board:
             header += f"|\t{co_numb}\t"
         print(header + "|")
         columns_row = ""
-        print(f"{'-' * 60}")
+        print(f"{'-' * self.columns * 2 *8}")
         for i in range(self.rows):
             for j in range(self.columns):
                 columns_row += f"|\t{items_board.get_item(i, j)}\t"
-            columns_row += f"|\n{'-' * 60}\n"
+            columns_row += f"|\n{'-' * self.columns * 2 * 8}\n"
         print(columns_row)
 
 
