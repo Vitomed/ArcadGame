@@ -11,15 +11,14 @@ WIN_ELEMENTS = int(argv[3])
 PLAYERS = {"X": "Игрок № 1", "O": "Игрок № 2"}
 
 
-class ItemsBoard:
+class CellItems:
 
-    __slots__ = ["_rows", "_columns", "_np_cells"]
+    __slots__ = ("_rows", "_columns", "_np_cells")
 
-    def __init__(self, rows: int, columns: int, cells_range: list):
-
+    def __init__(self, rows: int, columns: int, cells_lst: list):
         self._rows = rows
         self._columns = columns
-        self._np_cells = np.array(cells_range, dtype=object).reshape(rows, columns)
+        self._np_cells = np.array(cells_lst, dtype=object).reshape(rows, columns)
 
     @property
     def rows(self):
@@ -33,11 +32,11 @@ class ItemsBoard:
     def cells(self):
         return self._np_cells
 
-    def get_item(self, i, j):
+    def get_item(self, i: int, j: int):
         return self._np_cells[i][j]
 
     #  with gravity
-    def set_item(self, j, marker):
+    def set_item(self, j: int, marker: str) -> bool:
         column = j
         for i in range(self._rows):
 
@@ -48,34 +47,37 @@ class ItemsBoard:
 
         self._np_cells[self._rows - 1][column] = marker
 
-    def get_empty(self, column: int):
+    # return True if cell is empty
+    def get_empty(self, column: int) -> bool:
         for i in range(self._rows):
             if not self._np_cells[i][column]:
                 return True
 
 
 class Board:
-    __slots__ = ["rows", "columns"]
+
+    __slots__ = ("_rows", "_columns")
 
     def __init__(self, rows, columns):
-        self.rows = rows
-        self.columns = columns
+        self._rows = rows
+        self._columns = columns
 
-    def draw_board(self, items_board):
+    def draw_board(self, cell_items: object):
+
         header = ""
-        for co_numb in range(self.columns):
+        for co_numb in range(self._columns):
             header += f"|\t{co_numb}\t"
         print(header + "|")
         columns_row = ""
-        print(f"{'-' * self.columns * 2 *8}")
-        for i in range(self.rows):
-            for j in range(self.columns):
-                columns_row += f"|\t{items_board.get_item(i, j)}\t"
-            columns_row += f"|\n{'-' * self.columns * 2 * 8}\n"
+        print(f"{'-' * self._columns * 2 *8}")
+        for i in range(self._rows):
+            for j in range(self._columns):
+                columns_row += f"|\t{cell_items.get_item(i, j)}\t"
+            columns_row += f"|\n{'-' * self._columns * 2 * 8}\n"
         print(columns_row)
 
 
-def take_input(marker: str, item_board: object):
+def take_input(marker: str, cell_items: object):
     valid = False
     while not valid:
         player_answer = input(f"Куда поставим {marker}? (укажите номер столбца)")
@@ -87,12 +89,12 @@ def take_input(marker: str, item_board: object):
             continue
 
         min = 0
-        max = item_board.rows
+        max = cell_items.rows
 
         if min <= player_answer <= max:
-            if item_board.get_empty(player_answer):
+            if cell_items.get_empty(player_answer):
                 column = player_answer
-                item_board.set_item(column, marker)
+                cell_items.set_item(column, marker)
                 valid = True
             else:
                 print("Эта клеточка уже занята")
@@ -100,10 +102,10 @@ def take_input(marker: str, item_board: object):
             print(f"Введите число в диапазоне  от {min}  до {max}, чтобы походить.")
 
 
-def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
-    rows = item_board.rows
-    columns = item_board.columns
-    matrix = items_board.cells
+def check_win(cell_items: object, marker: str, win_lenght: int, players: dict):
+    rows = cell_items.rows
+    columns = cell_items.columns
+    matrix = cell_items.cells
 
     # check for row
     for idx in range(rows):
@@ -140,8 +142,8 @@ def list_sum(row, marker, lenght):
 if __name__ == "__main__":
 
     cells = int(ROWS * COLUMNS)
-    cells_range = ["" for i in range(cells)]
-    item_board = ItemsBoard(rows=ROWS, columns=COLUMNS, cells_range=cells_range)
+    cells_lst = ["" for i in range(cells)]
+    cell_items = CellItems(rows=ROWS, columns=COLUMNS, cells_lst=cells_lst)
     board = Board(rows=ROWS, columns=COLUMNS)
 
     flag = True
@@ -149,25 +151,25 @@ if __name__ == "__main__":
     try:
         while flag:
 
-            board.draw_board(item_board)
+            board.draw_board(cell_items)
 
             if counter % 2 == 0:
                 marker = "X"
                 print("Ход игрока № 1:")
-                take_input(marker, item_board)
+                take_input(marker, cell_items)
             else:
                 print("Ход игрока № 2:")
                 marker = "O"
-                take_input(marker, item_board)
+                take_input(marker, cell_items)
 
-            temp = check_win(item_board, marker, WIN_ELEMENTS, players=PLAYERS)
+            temp = check_win(cell_items, marker, WIN_ELEMENTS, players=PLAYERS)
             if temp:
                 break
             if counter == cells:
                 print("Ничья!")
                 break
             counter += 1
-        board.draw_board(item_board)
+        board.draw_board(cell_items)
 
     except KeyboardInterrupt:
         print("\nИгра преждевременно остановлена!")
