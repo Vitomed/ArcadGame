@@ -22,6 +22,10 @@ class ItemsBoard:
         return self._rows
 
     @property
+    def columns(self):
+        return self._columns
+
+    @property
     def cells(self):
         return self._np_cells
 
@@ -47,7 +51,6 @@ class ItemsBoard:
 
 
 class Board:
-
     __slots__ = ["rows", "columns"]
 
     def __init__(self, rows, columns):
@@ -94,39 +97,29 @@ def take_input(marker: str, item_board: object):
 
 
 def check_win(items_board: object, marker: str, win_lenght: int, players: dict):
-    i_b = items_board.cells
+    rows = item_board.rows
+    columns = item_board.columns
+    matrix = items_board.cells
 
     # check for row
-    for row in enumerate(i_b):
-        if list_sum(row[1], marker, win_lenght) == "ok":
+    for idx in range(rows):
+        lst = matrix[idx, :]
+        if list_sum(lst, marker, win_lenght) == "ok":
             print("Победил: ", players[marker])
             return True
 
     # check for column
-    for index, _ in enumerate(i_b[0]):
-        if list_sum(i_b[:, index], marker, win_lenght) == "ok":
+    for idx in range(columns):
+        lst = matrix[:, idx]
+        if list_sum(lst, marker, win_lenght) == "ok":
             print("Победил: ", players[marker])
             return True
 
-    # create diagonaly
-    max_col = len(i_b)
-    max_row = len(i_b[0])
-    min_bdiag = -max_col + 1
-    fdiag = [[] for i in range(max_col + max_row - 1)]
-    bdiag = [[] for i in range(len(fdiag))]
-    for y in range(max_col):
-        for x in range(max_row):
-            fdiag[x + y].append(i_b[y][x])
-            bdiag[-min_bdiag + x - y].append(i_b[y][x])
+    diags = [matrix[::-1, :].diagonal(i) for i in range(-rows + 1, columns)]
+    diags.extend(matrix.diagonal(i) for i in range(rows, -columns + 1, -1))
 
-    #  check for diagonally 1
-    for row in fdiag:
-        if list_sum(row, marker, win_lenght) == "ok":
-            print("Победил: ", players[marker])
-            return True
-
-    # check for diagonally 2
-    for row in bdiag:
+    #  check for diagonalls
+    for row in diags:
         if list_sum(row, marker, win_lenght) == "ok":
             print("Победил: ", players[marker])
             return True
@@ -141,6 +134,7 @@ def list_sum(row, marker, lenght):
 
 
 if __name__ == "__main__":
+
     cells = int(ROWS * COLUMNS)
     cells_range = ["" for i in range(cells)]
     item_board = ItemsBoard(rows=ROWS, columns=COLUMNS, cells_range=cells_range)
@@ -173,5 +167,3 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         print("\nИгра преждевременно остановлена!")
-
-
